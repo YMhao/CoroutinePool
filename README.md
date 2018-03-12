@@ -71,13 +71,13 @@ type Payload interface {
 例子：
 
 ```golang
-// PayLoadType1 -- PayLoad Type 1
-type PayLoadType1 struct {
+// PayloadType1 -- PayLoad Type 1
+type PayloadType1 struct {
 	Data string
 }
 
 // Call -- method Call
-func (d *PayLoadType1) Call() {
+func (d *PayloadType1) Call() {
 	fmt.Println("Type1:", "Data =", d.Data)
 }
 ```
@@ -86,19 +86,25 @@ func (d *PayLoadType1) Call() {
 ```golang
 func main() {
     ...
-	d := CoroutinePool.NewDispatcher(10)
+    // 一级缓冲区大小100, 二级缓冲区大小10
+	d := CoroutinePool.NewDispatcher(100, 10)
     d.Run()
     ...
 }
 ```
 
-3. 往 JobQueue 里推送工作任务即可
+3. 推送负载
 
 ```golang
-payload := &PayloadType1{
-    Data: "abc",
-}
-JobQueue <- Job{
-    Payload: payload,
-}
+    payload := &PayloadType1{
+        Data: "abc",
+    }
+    d.PushPayload(payload)
+```
+
+# 停止工作
+
+```
+    d.Stop()
+
 ```

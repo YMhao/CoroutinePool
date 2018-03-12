@@ -10,7 +10,3 @@ type Payload interface {
 type Job struct {
 	Payload Payload
 }
-
-// JobQueue -- A buffered channel that we can send work requests on.
-// 工作任务发布到这里， worker将会从这里读取工作任务
-var JobQueue = make(chan Job)

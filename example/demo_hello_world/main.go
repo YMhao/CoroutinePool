@@ -7,52 +7,49 @@ import (
 	"github.com/YMhao/CoroutinePool"
 )
 
-// PayLoadType1 -- PayLoad Type 1
-type PayLoadType1 struct {
+// PayloadType1 -- PayLoad Type 1
+type PayloadType1 struct {
 	Data string
 }
 
 // Call -- method Call
-func (d *PayLoadType1) Call() {
+func (d *PayloadType1) Call() {
 	fmt.Println("Type1:", "Data =", d.Data)
 }
 
-// PayLoadType2 -- PayLoad Type 1
-type PayLoadType2 struct {
+// PayloadType2 -- PayLoad Type 1
+type PayloadType2 struct {
 	UserName string
 }
 
 // Call -- method Call
-func (d *PayLoadType2) Call() {
+func (d *PayloadType2) Call() {
 	fmt.Println("Type2:", "Hello", d.UserName)
 }
 
 func main() {
-	d := CoroutinePool.NewDispatcher(10)
+	d := CoroutinePool.NewDispatcher(100, 10)
 	d.Run()
 
 	go func() {
 		for {
-			payload := &PayLoadType1{
+			payload := &PayloadType1{
 				Data: "abc",
 			}
-			CoroutinePool.JobQueue <- CoroutinePool.Job{
-				Payload: payload,
-			}
-			time.Sleep(1 * time.Second)
+			d.PushPayload(payload)
 		}
 	}()
 
 	go func() {
 		for {
-			payload := &PayLoadType2{
-				UserName: "world",
+			payload := &PayloadType2{
+				UserName: "hao",
 			}
-			CoroutinePool.JobQueue <- CoroutinePool.Job{
-				Payload: payload,
-			}
-			time.Sleep(2 * time.Second)
+			d.PushPayload(payload)
 		}
 	}()
-	time.Sleep(5 * time.Second)
+
+	time.Sleep(1 * time.Second)
+	d.Stop()
+	time.Sleep(1 * time.Second)
 }

@@ -23,7 +23,7 @@ func (d *PayloadType2) Call() {
 }
 
 func TestJobQueue(t *testing.T) {
-	d := NewDispatcher(10)
+	d := NewDispatcher(100, 10)
 	d.Run()
 
 	go func() {
@@ -31,10 +31,7 @@ func TestJobQueue(t *testing.T) {
 			payload := &PayloadType1{
 				Data: "abc",
 			}
-			JobQueue <- Job{
-				Payload: payload,
-			}
-			time.Sleep(1 * time.Second)
+			d.PushPayload(payload)
 		}
 	}()
 
@@ -43,12 +40,11 @@ func TestJobQueue(t *testing.T) {
 			payload := &PayloadType2{
 				UserName: "hao",
 			}
-			JobQueue <- Job{
-				Payload: payload,
-			}
-			time.Sleep(2 * time.Second)
+			d.PushPayload(payload)
 		}
 	}()
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(1 * time.Second)
+	d.Stop()
+	time.Sleep(1 * time.Second)
 }

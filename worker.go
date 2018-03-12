@@ -8,8 +8,8 @@ type Worker struct {
 }
 
 // NewWorker -- new a worker
-func NewWorker(WorkerPool chan chan Job) Worker {
-	return Worker{
+func NewWorker(WorkerPool chan chan Job) *Worker {
+	return &Worker{
 		WorkerPool: WorkerPool,
 		JobChannel: make(chan Job),
 		quit:       make(chan bool),
