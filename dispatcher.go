@@ -1,4 +1,4 @@
-package ChannelPool
+package CoroutinePool
 
 type Dispatcher struct {
 	WorkerPool chan chan Job

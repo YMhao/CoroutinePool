@@ -1,4 +1,4 @@
-package ChannelPool
+package CoroutinePool
 
 // Worker -- the worker that executes the job
 type Worker struct {

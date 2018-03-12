@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/YMhao/ChannelPool"
+	"github.com/YMhao/CoroutinePool"
 )
 
 // PayLoadType1 -- PayLoad Type 1
@@ -28,7 +28,7 @@ func (d *PayLoadType2) Call() {
 }
 
 func main() {
-	d := ChannelPool.NewDispatcher(10)
+	d := CoroutinePool.NewDispatcher(10)
 	d.Run()
 
 	go func() {
@@ -36,7 +36,7 @@ func main() {
 			payload := &PayLoadType1{
 				Data: "abc",
 			}
-			ChannelPool.JobQueue <- ChannelPool.Job{
+			CoroutinePool.JobQueue <- CoroutinePool.Job{
 				Payload: payload,
 			}
 			time.Sleep(1 * time.Second)
@@ -48,7 +48,7 @@ func main() {
 			payload := &PayLoadType2{
 				UserName: "world",
 			}
-			ChannelPool.JobQueue <- ChannelPool.Job{
+			CoroutinePool.JobQueue <- CoroutinePool.Job{
 				Payload: payload,
 			}
 			time.Sleep(2 * time.Second)

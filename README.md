@@ -1,5 +1,7 @@
 # 概述
 
+Coroutine Pool
+
 这是一个协程池， 用户处理大负载情况，降低延时
 
 # 如何处理大负载，降低延时
@@ -84,7 +86,7 @@ func (d *PayLoadType1) Call() {
 ```golang
 func main() {
     ...
-	d := ChannelPool.NewDispatcher(10)
+	d := CoroutinePool.NewDispatcher(10)
     d.Run()
     ...
 }

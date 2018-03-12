@@ -1,4 +1,4 @@
-package ChannelPool
+package CoroutinePool
 
 import (
 	"fmt"
