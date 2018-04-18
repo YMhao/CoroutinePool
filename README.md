@@ -4,6 +4,10 @@ Coroutine Pool
 
 这是一个协程池， 用户处理大负载情况，降低延时
 
+主要基于以下两点考虑：
+1、要有一个缓冲的队列。
+2、控制产生的协程的数量。
+
 # 如何处理大负载，降低延时
 
 简单地使用goroutine能满足中小型负载， 代码如下
@@ -16,95 +20,66 @@ Coroutine Pool
 
 ```
 
-但是这样我们没法控制产生的go routine的数量， 当收到每分钟1百万个请求时，这样的代码很快就崩溃了。
+但是这样我们没法控制产生的go routine的数量，当请求量很大的时候，这样的代码很快就崩溃了。  
 
-如果用创建一个缓冲的channel来处理，也只是把问题推迟了而已。
+改进（但问题依然存在，不能很好地控制任务并行的数量）
+```golang
+
+var JobQueue = make(chan Payload, MAX_JOB_QUEUE)
+
+func StartProcessor() {
+    for {
+        select {
+        case job := <-JobQueue:
+            //to do
+        }
+    }
+}
+```
+这样做有一个存放任务的队列，但是不能控制任务队列的并发量。   
 
 那么如何解决呢？
 
 这里使用了二级channel的方法来解决这个问题。
+第一级：有一个存放任务的缓冲队列。
+第二级：控制任务队列的并发数（对worker的数量进行控制）。
 
 #  该协程池特点
 
-使用简单， 扩展方便 
+1、使用简单， 扩展方便 .  
+2、负载的结构体可以进行自定义， 实现Call()方法即可。
 
-负载的结构体可以进行自定义， 实现Call()方法即可
+# 接口说明
 
-如果是api接口，那么负载可以是各个api的请求
+接口有4个：
+1、新建二级缓存。
+2、开始工作。
+2、推送负载。
+3、停止工作。
 
-举个例子， 获取用户信息，匹配文本
+新建二级缓存(一个分配器):
 ```golang
-type GetUserInfoRequest struct{
-    SessionId string
-    C *gin.Context
-}
-
-func (g *GetUserInfoRequest) Call() {
-    // to do 
-}
-
-type MatchWordRequest struct {
-    SessionId string
-    Keyword   string
-    C         *gin.Context
-}
-
-func (m *MatchUserRequest) Call() {
-    // to do 
-}
-
+// NewDispatcher -- maxQueue 任务队列的缓存大小， maxWorkers 工作携程的数量（控制并行数）
+func NewDispatcher(maxQueue, maxWorkers int) *Dispatcher
+```
+开始工作：
+```golang
+func (d *Dispatcher) Run()
 ```
 
-
-# 如何使用(三部曲)
-
-例子请看 example/demo_hello_world
-
-1. 定义负载
-
-负载接口定义如下:
+推送负载:
 ```golang
+// Payload -- Payload interface
+// worker 将会从 Job 中获取 payload, 执行该payload的call方法
 type Payload interface {
 	Call()
 }
-```
-例子：
+// PushPayload -- Push a payload
+func (d *Dispatcher) PushPayload(payload Payload)
 
+```
+
+停止工作:
 ```golang
-// PayloadType1 -- PayLoad Type 1
-type PayloadType1 struct {
-	Data string
-}
-
-// Call -- method Call
-func (d *PayloadType1) Call() {
-	fmt.Println("Type1:", "Data =", d.Data)
-}
-```
-
-2. 设置池大小, 启动
-```golang
-func main() {
-    ...
-    // 一级缓冲区大小100, 二级缓冲区大小10
-	d := CoroutinePool.NewDispatcher(100, 10)
-    d.Run()
-    ...
-}
-```
-
-3. 推送负载
-
-```golang
-    payload := &PayloadType1{
-        Data: "abc",
-    }
-    d.PushPayload(payload)
-```
-
-# 停止工作
-
-```
-    d.Stop()
-
+func (d *Dispatcher) Stop()
 ```

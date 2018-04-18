@@ -8,7 +8,7 @@ type Dispatcher struct {
 	jobQueue   chan Job
 }
 
-// NewDispatcher -- maxQueue 一级channel缓冲最大值， maxWorkers 二级channel缓冲最大值
+// NewDispatcher -- maxQueue 任务队列的缓存大小， maxWorkers 工作携程的数量（控制并行数）
 func NewDispatcher(maxQueue, maxWorkers int) *Dispatcher {
 	return &Dispatcher{
 		workerPool: make(chan chan Job, maxWorkers),
@@ -18,7 +18,7 @@ func NewDispatcher(maxQueue, maxWorkers int) *Dispatcher {
 	}
 }
 
-// Run -- run workers
+// Run --  run
 func (d *Dispatcher) Run() {
 	if len(d.workers) != d.maxWorkers {
 		count := d.maxWorkers - len(d.workers)
@@ -54,7 +54,7 @@ func (d *Dispatcher) createWorkers(count int) {
 	}
 }
 
-// Stop 停止所有worker
+// Stop -- stop
 func (d *Dispatcher) Stop() {
 	for _, worker := range d.workers {
 		worker.Stop()
